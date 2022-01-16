@@ -806,6 +806,10 @@
       "members": [
         {
           "type": "SYMBOL",
+          "name": "recursive_composition"
+        },
+        {
+          "type": "SYMBOL",
           "name": "sequential_composition"
         },
         {

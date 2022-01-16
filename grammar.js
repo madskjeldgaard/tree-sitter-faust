@@ -212,7 +212,7 @@ conflicts: $ => [
 		),
 
 		binary_composition: $ => choice(
-			// $.recursive_composition,
+			$.recursive_composition,
 			$.sequential_composition,
 			$.split_composition,
 			$.merge_composition,

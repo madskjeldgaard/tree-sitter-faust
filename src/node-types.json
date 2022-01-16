@@ -16,6 +16,10 @@
           "named": true
         },
         {
+          "type": "recursive_composition",
+          "named": true
+        },
+        {
           "type": "sequential_composition",
           "named": true
         },
@@ -434,6 +438,32 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "recursive_composition",
+    "named": true,
+    "fields": {
+      "left": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      },
+      "right": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "expression",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
