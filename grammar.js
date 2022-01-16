@@ -1,6 +1,7 @@
 const PRECEDENCE = {
 	EXPRESSION: 10,
 	STRING: 2,
+	BINARY_OP: 5,
 	RECURSIVE: 4,
 	PAR: 3,
 	SEQ: 2,
@@ -13,6 +14,10 @@ function sepBy1(sep, rule) {
 	return seq(rule, repeat(seq(sep, rule)))
 }
 
+function sepBy2(sep, rule) {
+	return seq(rule, repeat1(seq(sep, rule)))
+}
+
 function sepBy(sep, rule) {
 	return optional(sepBy1(sep, rule))
 }
@@ -20,10 +25,10 @@ function sepBy(sep, rule) {
 module.exports = grammar({
 	name: 'faust',
 conflicts: $ => [
-		[$.binary_composition, $.binary_operation]
+		[$.binary_composition, $.binary_operation],
+		[$.merge_composition, $.split_composition, $.parallel_composition]
 	],
 	rules: {
-		// TODO: add the actual grammar rules
 		source_file: $ => repeat(choice($.comment, $._statement)),
 
 		_statement: $ => choice(
@@ -46,7 +51,7 @@ conflicts: $ => [
 		simple_definition: $ => seq(
 			field("name", $.identifier),
 			"=",
-			field("value", choice($.expression, $.object)),
+			field("value", $.expression),
 		),
 
 		function_definition: $ => choice(
@@ -85,16 +90,18 @@ conflicts: $ => [
 			$.one_sample_delay,
 			$.object,
 			$.binary_composition,
-			$.binary_operation
-
+			$.binary_operation,
+			$.identity_function,
 		)),
 
-		binary_operation: $=> choice(
+		identity_function: $=> "_",
+
+		binary_operation: $=> prec(PRECEDENCE.BINARY_OP, choice(
 			$.infix,
 			$.core,
 			$.prefix,
 			$.partial
-		),
+		)),
 
 		core: $ => prec(PRECEDENCE.CORE,
 			choice(
@@ -201,7 +208,7 @@ conflicts: $ => [
 		),
 
 		binary_composition: $ => choice(
-			$.recursive_composition,
+			// $.recursive_composition,
 			$.sequential_composition,
 			$.split_composition,
 			$.merge_composition,
@@ -221,28 +228,28 @@ conflicts: $ => [
 		)),
 
 		split_composition: $ => prec.right(PRECEDENCE.SPLIT, seq(
-			field("left", $.expression ),
+			$.expression,
 			"<:",
-			field("right", $.expression ),
+			sepBy2(",", $.expression)
 		)),
 
 		merge_composition: $ => prec.right(PRECEDENCE.MERGE, seq(
-			field("left", $.expression ),
+			sepBy2(",", $.expression),
 			":>",
-			field("right", $.expression ),
+			$.expression,
 		)),
 
 		parallel_composition: $ => prec.right(PRECEDENCE.PAR,
 			choice(
 				seq(
 					$.expression,
-					sepBy1(",", $.expression)
+					sepBy2(",", $.expression)
 				),
 				seq(
 					"(",
 					seq(
 						$.expression,
-						sepBy1(",", $.expression)
+						sepBy2(",", $.expression)
 					),
 					")"
 				),

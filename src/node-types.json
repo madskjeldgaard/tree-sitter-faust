@@ -12,10 +12,6 @@
           "named": true
         },
         {
-          "type": "recursive_composition",
-          "named": true
-        },
-        {
           "type": "sequential_composition",
           "named": true
         },
@@ -110,6 +106,10 @@
         },
         {
           "type": "binary_operation",
+          "named": true
+        },
+        {
+          "type": "identity_function",
           "named": true
         },
         {
@@ -276,27 +276,16 @@
   {
     "type": "merge_composition",
     "named": true,
-    "fields": {
-      "left": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "expression",
-            "named": true
-          }
-        ]
-      },
-      "right": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "expression",
-            "named": true
-          }
-        ]
-      }
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -414,32 +403,6 @@
     }
   },
   {
-    "type": "recursive_composition",
-    "named": true,
-    "fields": {
-      "left": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "expression",
-            "named": true
-          }
-        ]
-      },
-      "right": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "expression",
-            "named": true
-          }
-        ]
-      }
-    }
-  },
-  {
     "type": "sequential_composition",
     "named": true,
     "fields": {
@@ -486,10 +449,6 @@
           {
             "type": "expression",
             "named": true
-          },
-          {
-            "type": "object",
-            "named": true
           }
         ]
       }
@@ -525,27 +484,16 @@
   {
     "type": "split_composition",
     "named": true,
-    "fields": {
-      "left": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "expression",
-            "named": true
-          }
-        ]
-      },
-      "right": {
-        "multiple": false,
-        "required": true,
-        "types": [
-          {
-            "type": "expression",
-            "named": true
-          }
-        ]
-      }
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "expression",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -701,6 +649,10 @@
   },
   {
     "type": "identifier",
+    "named": true
+  },
+  {
+    "type": "identity_function",
     "named": true
   },
   {
