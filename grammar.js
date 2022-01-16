@@ -1,4 +1,5 @@
 const PRECEDENCE = {
+	FUNCTION_CALL: 1,
 	EXPRESSION: 10,
 	STRING: 2,
 	BINARY_OP: 6,
@@ -26,10 +27,7 @@ module.exports = grammar({
 	name: 'faust',
 conflicts: $ => [
 		[$.binary_composition, $.binary_operation],
-		[$.merge_composition, $.split_composition, $.parallel_composition, $.sequential_composition],
-		[$.merge_composition, $.split_composition],
-		[$.merge_composition, $.parallel_composition],
-		[$.split_composition, $.parallel_composition]
+		[$.function_call, $.merge_composition, $.split_composition, $.parallel_composition, $.sequential_composition],
 	],
 	rules: {
 		source_file: $ => repeat(choice($.comment, $._statement)),
@@ -52,7 +50,7 @@ conflicts: $ => [
 		),
 
 		simple_definition: $ => seq(
-			field("name", $.identifier),
+			field("name", $.variable),
 			"=",
 			field("value", $.expression),
 		),
@@ -60,7 +58,7 @@ conflicts: $ => [
 		function_definition: $ => choice(
 			// "Normal" function definition
 			seq(
-				field("name", $.identifier),
+				field("name", $.variable),
 				"(", sepBy(",", alias($.identifier, $.parameter)), ")",
 				"=",
 				field("value", $.expression),
@@ -68,11 +66,21 @@ conflicts: $ => [
 
 			// Lambda abstraction
 			seq(
-				field("name", $.identifier),
+				field("name", $.variable),
 				"=",
 				field("value", $.lambda_abstraction),
 			)
 		),
+
+		function_call: $ => prec(PRECEDENCE.FUNCTION_CALL, seq(
+			optional(seq(alias($.identifier, $.module_name), ".")),
+			alias($.identifier, $.function_name),
+			"(",
+			sepBy(",", $.argument),
+			")",
+		)),
+
+		argument: $ => choice($.object, $.function_call),
 
 		lambda_abstraction: $ => seq(
 			seq(
@@ -95,8 +103,18 @@ conflicts: $ => [
 			$.binary_composition,
 			$.binary_operation,
 			$.identity_function,
+			$.iteration,
+			$.function_call
 		)),
 
+		iteration: $ => seq(
+			choice("par", "seq", "sum", "prod"),
+			alias( $.identifier, $.current_iteration),
+			",",
+			alias($.object, $.numiter),
+			",",
+			$.expression
+		),
 		identity_function: $=> "_",
 
 		binary_operation: $=> prec(PRECEDENCE.BINARY_OP, choice(
@@ -159,18 +177,27 @@ conflicts: $ => [
 		),
 
 		// @TODO This should be in expression
-		object: $ => choice($.primitive),
+		object: $ => choice($.primitive, $.variable, $.string),
 
 		primitive: $ => choice($.float, $.integer, $.exponent),
+		float: $ => choice(
+			// 1.(0)
+			/[\+\-]?\d(.?\d)*(e[\+\-]?\d+)*/,
+			// (1).0
+			/[\+\-]?\d*(.?\d)(e[\+\-]?\d+)*/,
 
-		float: $ => prec.left(seq(
-			optional(choice("-", "+")),
-			choice(
-				seq($._digit, ".", optional($._digit)),
-				seq(optional($._digit), ".", $._digit),
-			),
-			optional($.exponent),
-		)),
+			// 1.
+			/[\+\-]?\d+\./,
+		),
+
+		// float: $ => seq(
+		// 	optional(choice("-", "+")),
+		// 	choice(
+		// 		seq($._digit, ".", optional($._digit)),
+		// 		seq(optional($._digit), ".", $._digit),
+		// 	),
+		// 	optional($.exponent),
+		// ),
 
 		integer: $ => /[\+\-]?\d+/,
 		exponent: $ => /e[\+\-]?\d+/,
@@ -274,6 +301,10 @@ conflicts: $ => [
 			)
 		)),
 
+		variable: $ => seq(
+			optional(seq(alias($.identifier, $.module_name), ".")),
+			$.identifier
+		),
 		identifier: $ => /(r#)?[a-zA-Zα-ωΑ-Ωµ_][a-zA-Zα-ωΑ-Ωµ\d_]*/,
 
 		comment: $ => token(choice(
