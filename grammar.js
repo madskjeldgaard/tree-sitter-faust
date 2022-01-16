@@ -1,12 +1,12 @@
 const PRECEDENCE = {
 	EXPRESSION: 10,
 	STRING: 2,
-	BINARY_OP: 5,
-	RECURSIVE: 4,
-	PAR: 3,
-	SEQ: 2,
-	SPLIT: 1,
-	MERGE: 1,
+	BINARY_OP: 6,
+	RECURSIVE: 1,
+	PAR: 2,
+	SEQ: 4,
+	SPLIT: 4,
+	MERGE: 4,
 	CORE: 5,
 }
 
@@ -26,7 +26,10 @@ module.exports = grammar({
 	name: 'faust',
 conflicts: $ => [
 		[$.binary_composition, $.binary_operation],
-		[$.merge_composition, $.split_composition, $.parallel_composition]
+		[$.merge_composition, $.split_composition, $.parallel_composition, $.sequential_composition],
+		[$.merge_composition, $.split_composition],
+		[$.merge_composition, $.parallel_composition],
+		[$.split_composition, $.parallel_composition]
 	],
 	rules: {
 		source_file: $ => repeat(choice($.comment, $._statement)),
@@ -155,18 +158,19 @@ conflicts: $ => [
 
 		),
 
+		// @TODO This should be in expression
 		object: $ => choice($.primitive),
 
 		primitive: $ => choice($.float, $.integer, $.exponent),
 
-		float: $ => seq(
+		float: $ => prec.left(seq(
 			optional(choice("-", "+")),
 			choice(
 				seq($._digit, ".", optional($._digit)),
 				seq(optional($._digit), ".", $._digit),
 			),
 			optional($.exponent),
-		),
+		)),
 
 		integer: $ => /[\+\-]?\d+/,
 		exponent: $ => /e[\+\-]?\d+/,
@@ -212,7 +216,7 @@ conflicts: $ => [
 			$.sequential_composition,
 			$.split_composition,
 			$.merge_composition,
-			// $.parallel_composition,
+			$.parallel_composition,
 		),
 
 		recursive_composition: $ => prec.left(PRECEDENCE.RECURSIVE, seq(
@@ -228,29 +232,23 @@ conflicts: $ => [
 		)),
 
 		split_composition: $ => prec.right(PRECEDENCE.SPLIT, seq(
-			$.expression,
+			field("left", $.expression),
 			"<:",
-			sepBy2(",", $.expression)
+			field("right", sepBy2(",", $.expression))
 		)),
 
 		merge_composition: $ => prec.right(PRECEDENCE.MERGE, seq(
-			sepBy2(",", $.expression),
+			field("left", sepBy2(",", $.expression)),
 			":>",
-			$.expression,
+			field("right", $.expression),
 		)),
 
 		parallel_composition: $ => prec.right(PRECEDENCE.PAR,
 			choice(
-				seq(
-					$.expression,
-					sepBy2(",", $.expression)
-				),
+				sepBy2(",", $.expression),
 				seq(
 					"(",
-					seq(
-						$.expression,
-						sepBy2(",", $.expression)
-					),
+					sepBy2(",", $.expression),
 					")"
 				),
 			)

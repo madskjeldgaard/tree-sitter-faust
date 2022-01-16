@@ -27,11 +27,11 @@ a=_<:_,_;
       value: (expression
         (binary_composition
           (split_composition
-            (expression
+            left: (expression
               (identity_function ))
-            (expression
+            right: (expression
               (identity_function ))
-            (expression
+            right: (expression
               (identity_function ))))))))
 =====
 Split three
@@ -45,15 +45,17 @@ a=_<:_,_,_;
       value: (expression
         (binary_composition
           (split_composition
-            (expression
+            left: (expression
               (identity_function ))
-            (expression
+            right: (expression
               (identity_function ))
-			(expression
-              (identity_function ))
-            (expression
-              (identity_function ))))))))
-
+            right: (expression
+              (binary_composition
+                (parallel_composition
+                  (expression
+                    (identity_function ))
+                  (expression
+                    (identity_function )))))))))))
 =====
 Merge two
 =====
@@ -66,11 +68,11 @@ a=_,_:>_;
       value: (expression
         (binary_composition
           (merge_composition
-            (expression
+            left: (expression
               (identity_function ))
-            (expression
+            left: (expression
               (identity_function ))
-            (expression
+            right: (expression
               (identity_function ))))))))
 =====
 Merge three
@@ -83,12 +85,15 @@ a=_,_,_:>_;
       name: (identifier )
       value: (expression
         (binary_composition
-          (merge_composition
+          (parallel_composition
             (expression
               (identity_function ))
             (expression
-              (identity_function ))
-			(expression
-              (identity_function ))
-            (expression
-              (identity_function ))))))))
+              (binary_composition
+                (merge_composition
+                  left: (expression
+                    (identity_function ))
+                  left: (expression
+                    (identity_function ))
+                  right: (expression
+                    (identity_function )))))))))))
