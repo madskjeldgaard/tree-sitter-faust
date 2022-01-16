@@ -1,0 +1,26 @@
+{
+  "name": "tree-sitter-faust",
+  "version": "0.0.1",
+  "description": "tree-sitter grammar for faust",
+  "main": "grammar.js",
+  "scripts": {
+    "test": "tree-sitter test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/madskjeldgaard/tree-sitter-faust.git"
+  },
+  "author": "mads kjeldgaard",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/madskjeldgaard/tree-sitter-faust/issues"
+  },
+  "homepage": "https://github.com/madskjeldgaard/tree-sitter-faust#readme",
+  "dependencies": {
+    "nan": "^2.15.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.7.0",
+    "tree-sitter-cli": "^0.20.1"
+  }
+}
